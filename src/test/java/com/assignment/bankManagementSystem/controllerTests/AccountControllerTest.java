@@ -70,8 +70,8 @@ class AccountControllerTest {
 
 
     @Test
-    void testWithdraw_ValidAccountNumberSufficientBalance(){
-        // Arrange
+    void testWithdrawValidAccountNumberSufficientBalance(){
+    
         String validAccountNumber = "123456789";
         double withdrawAmount = 100.0;
         Accounts mockedAccount = new Accounts();
@@ -88,8 +88,8 @@ class AccountControllerTest {
         verify(accountServices, times(1)).withdraw(validAccountNumber, withdrawAmount);
     }
     @Test
-    void testWithdraw_InvalidAccountNumber() {
-        // Arrange
+    void testWithdrawInvalidAccountNumber() {
+    
         String invalidAccountNumber = "123456789";
         double withdrawAmount = 100.0;
         when(accountServices.getAccountByAccountNumber(invalidAccountNumber)).thenReturn(null);
@@ -104,7 +104,7 @@ class AccountControllerTest {
     }
 
     @Test
-    void testWithdraw_InsufficientBalance() {
+    void testWithdrawInsufficientBalance() {
 
         String validAccountNumber = "123456789";
         double withdrawAmount = 1000.0;
