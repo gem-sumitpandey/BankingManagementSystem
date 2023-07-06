@@ -76,7 +76,6 @@ public class UserController {
        }
        else{
            logger.warn("User not found");
-
            return new ResponseEntity<>(HttpStatus.NOT_FOUND) ;
        }
     }
