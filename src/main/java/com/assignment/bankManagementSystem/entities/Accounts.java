@@ -1,9 +1,11 @@
 package com.assignment.bankManagementSystem.entities;
 
+import com.assignment.bankManagementSystem.utils.AccountUtils;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+
 
 
 import javax.persistence.*;
@@ -11,29 +13,29 @@ import javax.persistence.*;
 
 import java.time.LocalDateTime;
 
+
 @Entity
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
+
 public class Accounts {
-
-
 
     @Id
     private String accountNumber;
-
-
-
     private String accountType;
     private Double balance;
     private String branch;
     private LocalDateTime accountCreatedOn=LocalDateTime.now();
-    private LocalDateTime accountUpdatedAt=LocalDateTime.now();
-
     @ManyToOne
     @JoinColumn(name="userId")
     private Users user;
+
+    @PrePersist
+    private void generateAccountNumber() {
+
+        this.accountNumber = AccountUtils.generateRandomAccountNumber();
+    }
 
 
 }

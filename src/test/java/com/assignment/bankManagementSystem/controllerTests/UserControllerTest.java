@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import com.assignment.bankManagementSystem.controller.UserController;
+import com.assignment.bankManagementSystem.dto.UserReadDto;
 import com.assignment.bankManagementSystem.entities.Users;
 import com.assignment.bankManagementSystem.services.UserServices;
 import org.junit.Before;
@@ -81,7 +82,7 @@ public class UserControllerTest {
         user.setUserId(userId);
 
         when(userServices.updateUserDetails(eq(userId),any(Users.class))).thenReturn(user);
-        Users updated = userController.putUser(userId,user).getBody();
+        UserReadDto updated = userController.putUser(userId,user).getBody();
         assertEquals(user,updated);
 
        verify(userServices,times(1)).updateUserDetails(eq(userId),any(Users.class));

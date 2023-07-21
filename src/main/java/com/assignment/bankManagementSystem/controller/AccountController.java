@@ -1,5 +1,6 @@
 package com.assignment.bankManagementSystem.controller;
 
+import com.assignment.bankManagementSystem.dto.AccountWriteDto;
 import com.assignment.bankManagementSystem.entities.Accounts;
 
 import com.assignment.bankManagementSystem.services.AccountServices;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -18,13 +20,13 @@ public class AccountController {
     private AccountServices accountServices;
     private Logger logger= LoggerFactory.getLogger(AccountController.class);
     @PostMapping("/openAccount")
-    public ResponseEntity<Accounts> openAccount(@RequestBody Accounts account){
+    public ResponseEntity<AccountWriteDto> openAccount( @RequestBody @Valid AccountWriteDto account){
         logger.info("Creating account: {}",account );
-        Accounts createdAccount=accountServices.openAccount(account);
+        AccountWriteDto createdAccount=accountServices.openAccount(account);
         return ResponseEntity.ok(createdAccount);
     }
     @GetMapping("/accounts/{accountNumber}")
-    public ResponseEntity<Accounts> getAccountByAccountNumber(@PathVariable("accountNumber") String accountNumber){
+    public ResponseEntity<Accounts> getAccountByAccountNumber( @PathVariable("accountNumber") String accountNumber){
         logger.info("Fetching Account By Given Account number: {}",accountNumber );
         Accounts account =accountServices.getAccountByAccountNumber(accountNumber);
         if (account!=null){
@@ -37,7 +39,7 @@ public class AccountController {
         }
     }
     @GetMapping("allAccounts/user/{userId}")
-    public ResponseEntity<List<Accounts>> getAccountsByUserId (@PathVariable("userId") int userId)
+    public ResponseEntity<List<Accounts>> getAccountsByUserId ( @PathVariable("userId")int userId)
     {
         logger.info("Fetching all accounts that are associated to a single user by userId: {}",userId );
         List<Accounts> accountDetails=accountServices.getAccountsByUserId(userId);
@@ -51,7 +53,7 @@ public class AccountController {
         }
     }
     @PostMapping("/deposit/{accountNumber}")
-    public ResponseEntity<Accounts> deposit(@PathVariable String accountNumber,@RequestParam double depositAmount){
+    public ResponseEntity<Accounts> deposit(@PathVariable String accountNumber,@RequestParam  double depositAmount){
 
         logger.info("Depositing amount {} into account number {}",depositAmount,accountNumber);
         Accounts account=accountServices.deposit(accountNumber,depositAmount);

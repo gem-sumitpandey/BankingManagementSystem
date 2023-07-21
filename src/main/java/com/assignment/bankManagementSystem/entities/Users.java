@@ -16,6 +16,7 @@ import java.util.List;
 public class Users {
 
     @Id
+    @GeneratedValue
     @Getter
     @Setter
     private int userId;
