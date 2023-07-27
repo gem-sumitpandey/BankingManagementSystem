@@ -53,7 +53,7 @@ public class Users {
     @Setter
     private String email;
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user")
     private List<Accounts> accountsList;
 
 

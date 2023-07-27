@@ -1,6 +1,5 @@
 package com.assignment.bankManagementSystem.daoTests;
 
-
 import com.assignment.bankManagementSystem.dao.AccountDao;
 import com.assignment.bankManagementSystem.entities.Accounts;
 import com.assignment.bankManagementSystem.entities.Users;
@@ -11,53 +10,50 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-
 import org.springframework.test.context.TestPropertySource;
 
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource(locations = "classpath:test-application.properties")
-
 public class AccountDaoTest {
 
+        @Autowired
+        private AccountDao accountDao;
 
-@Autowired
-private AccountDao accountDao;
+        @Autowired
+        private TestEntityManager entityManager;
 
-@Autowired
-private TestEntityManager entityManager;
+        private Users user;
 
-private Users user;
+        @BeforeEach
+        public void setup() {
+                user = new Users();
+                user.setUserId(100);
 
-@BeforeEach
-public void setup() {
-        user = new Users();
-        user.setUserId(100);
 
-        entityManager.persist(user);
-        entityManager.flush();
+                user = entityManager.merge(user);
+                entityManager.flush();
         }
 
-@Test
-public void testFindAllByUserUserId() {
-        Accounts account1 = new Accounts("ACC001", "Savings", 1000.0, "Branch A", LocalDateTime.now(), LocalDateTime.now(), user);
-        Accounts account2 = new Accounts("ACC002", "Current", 2000.0, "Branch B", LocalDateTime.now(), LocalDateTime.now(), user);
-        entityManager.persist(account1);
-        entityManager.persist(account2);
-        entityManager.flush();
+        @Test
+        public void testFindAllByUserUserId() {
 
-        List<Accounts> accounts = accountDao.findAllByUserUserId(user.getUserId());
+                Accounts account1 = new Accounts();
+                Accounts account2 = new Accounts();
 
 
-        Assertions.assertFalse(accounts.isEmpty());
+                account1.setUser(user);
+                account2.setUser(user);
 
-        Assertions.assertEquals(2, accounts.size());
+                entityManager.persist(account1);
+                entityManager.persist(account2);
+                entityManager.flush();
+
+                List<Accounts> accounts = accountDao.findAllByUserUserId(user.getUserId());
+
+                Assertions.assertFalse(accounts.isEmpty());
+                Assertions.assertEquals(2, accounts.size());
         }
-
-
-
-        }
+}

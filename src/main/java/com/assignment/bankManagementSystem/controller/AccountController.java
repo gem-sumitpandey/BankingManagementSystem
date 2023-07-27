@@ -1,5 +1,7 @@
 package com.assignment.bankManagementSystem.controller;
 
+import com.assignment.bankManagementSystem.dto.AccountReadDto;
+import com.assignment.bankManagementSystem.dto.AccountUpdateDto;
 import com.assignment.bankManagementSystem.dto.AccountWriteDto;
 import com.assignment.bankManagementSystem.entities.Accounts;
 
@@ -25,88 +27,65 @@ public class AccountController {
         AccountWriteDto createdAccount=accountServices.openAccount(account);
         return ResponseEntity.ok(createdAccount);
     }
+    @PostMapping("/updateAccount")
+    public ResponseEntity<Accounts> updateAccount(@RequestParam String accountNumber, @RequestBody @Valid AccountUpdateDto account){
+        logger.info("Updating details: {}",account);
+        Accounts updatedAccount=accountServices.updateAccount(accountNumber,account);
+        return ResponseEntity.ok(updatedAccount);
+    }
     @GetMapping("/accounts/{accountNumber}")
     public ResponseEntity<Accounts> getAccountByAccountNumber( @PathVariable("accountNumber") String accountNumber){
         logger.info("Fetching Account By Given Account number: {}",accountNumber );
         Accounts account =accountServices.getAccountByAccountNumber(accountNumber);
-        if (account!=null){
+
             logger.info("Account found");
             return ResponseEntity.ok(account);
         }
-        else{
-            logger.warn("Account not found");
-            return ResponseEntity.notFound().build();
-        }
-    }
+
     @GetMapping("allAccounts/user/{userId}")
     public ResponseEntity<List<Accounts>> getAccountsByUserId ( @PathVariable("userId")int userId)
     {
         logger.info("Fetching all accounts that are associated to a single user by userId: {}",userId );
         List<Accounts> accountDetails=accountServices.getAccountsByUserId(userId);
-        if(!accountDetails.isEmpty())
-        {   logger.info("All accounts found");
+            logger.info("All accounts found");
             return ResponseEntity.ok(accountDetails);
+
+
         }
-        else {
-            logger.warn("No account found");
-            return ResponseEntity.notFound().build();
-        }
-    }
     @PostMapping("/deposit/{accountNumber}")
-    public ResponseEntity<Accounts> deposit(@PathVariable String accountNumber,@RequestParam  double depositAmount){
+    public ResponseEntity<AccountReadDto> deposit(@PathVariable String accountNumber,@RequestParam  double depositAmount){
 
         logger.info("Depositing amount {} into account number {}",depositAmount,accountNumber);
-        Accounts account=accountServices.deposit(accountNumber,depositAmount);
-        if (account!=null){
+        AccountReadDto account=accountServices.deposit(accountNumber,depositAmount);
+
             logger.info("Amount deposited");
             return ResponseEntity.ok(account);
-        }
-        else{
-            logger.warn("Account not found");
-            return ResponseEntity.notFound().build();
-        }
+
+
     }
     @PostMapping("/withdraw/{accountNumber}")
-    public ResponseEntity<Accounts> withdraw(@PathVariable String accountNumber,@RequestParam double withdrawAmount){
+    public ResponseEntity<AccountReadDto> withdraw(@PathVariable String accountNumber,@RequestParam double withdrawAmount){
         logger.info("Withdrawing amount {} from account number {}",withdrawAmount,accountNumber);
-        Accounts account=accountServices.getAccountByAccountNumber(accountNumber);
-        if (account!=null&&withdrawAmount<=account.getBalance()){
-            account=accountServices.withdraw(accountNumber,withdrawAmount);
-            logger.info("Amount withdraw success");
-            return ResponseEntity.ok(account);
-        }
-        else{
-            logger.warn("Amount withdraw failed");
-            return ResponseEntity.internalServerError().build();
-        }
+        AccountReadDto account=accountServices.withdraw(accountNumber,withdrawAmount);
+        return ResponseEntity.ok(account);
+
     }
 
     @GetMapping("/balance/{accountNumber}")
     public ResponseEntity<Double> balanceEnquiry(@PathVariable String accountNumber){
         logger.info("Fetching balance of account number {}",accountNumber);
         Double balance=accountServices.balanceEnquiry(accountNumber);
-        if (balance!=null){
             logger.info("Balance {}",balance);
             return ResponseEntity.ok(balance);
-        }
-        else{
-            logger.warn("Account not found");
-            return ResponseEntity.notFound().build();
-        }
+
+
     }
     @DeleteMapping("/accounts/{accountNumber}")
     public ResponseEntity<HttpStatus> deleteAccount(String accountNumber){
         logger.info("Deleting account with account number {}",accountNumber);
-        Accounts account=accountServices.getAccountByAccountNumber(accountNumber);
-        if (account!=null){
             accountServices.deleteAccount(accountNumber);
             logger.info("Account deleted successfully");
             return new ResponseEntity<>(HttpStatus.OK);
         }
-        else{
-            logger.warn("Account does not exist");
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND) ;
-        }
-
     }
-}
+

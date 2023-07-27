@@ -2,11 +2,14 @@ package com.assignment.bankManagementSystem.controller;
 
 
 import com.assignment.bankManagementSystem.dto.UserReadDto;
+import com.assignment.bankManagementSystem.dto.UserUpdateDto;
 import com.assignment.bankManagementSystem.dto.UserWriteDto;
 import com.assignment.bankManagementSystem.entities.Users;
 
+import com.assignment.bankManagementSystem.exceptions.ConstraintException;
 import com.assignment.bankManagementSystem.services.UserServices;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -54,25 +57,18 @@ public class UserController {
 
     }
     @PutMapping("/users/{userId}")
-    public ResponseEntity<HttpStatus> putUser(@RequestParam int userId, @RequestBody @Valid UserWriteDto detailsToUpdate)    {
+    public ResponseEntity<HttpStatus> putUser(@RequestParam int userId, @RequestBody @Valid UserUpdateDto detailsToUpdate)    {
         logger.info("Updating details of user {}",userId);
-        UserReadDto updatedUser =userServices.updateUserDetails(userId,detailsToUpdate);
+       Users user= userServices.updateUserDetails(userId,detailsToUpdate);
         return new ResponseEntity<>(HttpStatus.OK);
 
     }
     @DeleteMapping("/users/{userId}")
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable int userId){
         logger.info("Deleting user userId {}",userId);
-       Users user = userServices.getUserById(userId);
-       if (user!=null){
-           userServices.deleteUser(userId);
-           logger.info("User deleted");
+        userServices.deleteUser(userId);
+        return new ResponseEntity<>(HttpStatus.OK);
 
-           return new ResponseEntity<>(HttpStatus.OK);
-       }
-       else{
-           logger.warn("User not found");
-           return new ResponseEntity<>(HttpStatus.NOT_FOUND) ;
-       }
-    }
+
+}
 }

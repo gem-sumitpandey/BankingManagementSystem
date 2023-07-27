@@ -2,9 +2,14 @@ package com.assignment.bankManagementSystem.services;
 
 import com.assignment.bankManagementSystem.dao.AccountDao;
 import com.assignment.bankManagementSystem.dao.UserDao;
+import com.assignment.bankManagementSystem.dto.AccountReadDto;
+import com.assignment.bankManagementSystem.dto.AccountUpdateDto;
 import com.assignment.bankManagementSystem.dto.AccountWriteDto;
 import com.assignment.bankManagementSystem.entities.Accounts;
 import com.assignment.bankManagementSystem.entities.Users;
+
+import com.assignment.bankManagementSystem.exceptions.InsufficientBalanceException;
+import com.assignment.bankManagementSystem.exceptions.InvalidArgumentException;
 import com.assignment.bankManagementSystem.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +22,7 @@ public class AccountServicesImplementation implements AccountServices {
     AccountDao accountDao;
  @Autowired
      UserDao userDao;
-    private AccountWriteDto convertToDTO(Accounts account) {
+    private AccountWriteDto convertToWriteDto(Accounts account) {
         AccountWriteDto dto= new AccountWriteDto();
         dto.setUserId((account.getUser().getUserId()));
         dto.setAccountType(account.getAccountType());
@@ -26,10 +31,16 @@ public class AccountServicesImplementation implements AccountServices {
 
         return dto;
     }
+    private AccountReadDto convertToReadDTO(Accounts accounts) {
+        AccountReadDto accountReadDto=new AccountReadDto();
+        accountReadDto.setAccountNumber(accounts.getAccountNumber());
+        accountReadDto.setBalance(accounts.getBalance());
+        return accountReadDto;
+    }
 
 
     @Override
-    public AccountWriteDto openAccount(@Valid AccountWriteDto accountWriteDto) {
+    public AccountWriteDto openAccount(AccountWriteDto accountWriteDto) {
         Users user = userDao.findById(accountWriteDto.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + accountWriteDto.getUserId()));
         Accounts account = new Accounts();
@@ -40,8 +51,15 @@ public class AccountServicesImplementation implements AccountServices {
 
         account = accountDao.save(account);
 
-        return convertToDTO(account);
+        return convertToWriteDto(account);
 
+    }
+    public Accounts updateAccount(String accountNumber,AccountUpdateDto accountUpdateDto){
+        Accounts account=accountDao.findById(accountNumber).orElseThrow(()->new ResourceNotFoundException("No account exists with account number: "+accountNumber));
+        account.setAccountType(accountUpdateDto.getAccountType());
+        account.setBranch(accountUpdateDto.getBranch());
+        account=accountDao.save(account);
+        return account;
     }
 
     @Override
@@ -55,25 +73,31 @@ public class AccountServicesImplementation implements AccountServices {
     }
 
 
-    public Accounts deposit(String accountNumber,double depositAmount){
+    public AccountReadDto deposit(String accountNumber, double depositAmount){
         Accounts account=accountDao.findById(accountNumber).orElseThrow(() -> new ResourceNotFoundException("No account exist with account number: " + accountNumber));
-
+        if(depositAmount<=0){
+            throw new InvalidArgumentException("Deposit Amount should be greater than 0");
+        }
             account.setBalance(account.getBalance()+depositAmount);
-            return accountDao.save(account);
+             accountDao.save(account);
+        return  convertToReadDTO(account);
         }
 
-    public Accounts withdraw(String accountNumber,double withdrawAmount)  {
+    public AccountReadDto withdraw(String accountNumber, double withdrawAmount)  {
         Accounts account=accountDao.findById(accountNumber).orElseThrow(() -> new ResourceNotFoundException("No account exist with account number: " + accountNumber));
 
-
-            double currentBalance=account.getBalance();
-            if(currentBalance>=withdrawAmount){
-                account.setBalance(currentBalance-withdrawAmount);
-            }
-
-            return accountDao.save(account);
+        if(withdrawAmount<=0){
+            throw new InvalidArgumentException("Withdraw Amount should be greater than 0");
         }
-
+            double currentBalance=account.getBalance();
+            if (currentBalance<withdrawAmount){
+                throw new InsufficientBalanceException("Insufficient Balance");}
+            else{
+            account.setBalance(account.getBalance()-withdrawAmount);
+                accountDao.save(account);
+        }
+         return  convertToReadDTO(account);
+    }
 
 
 

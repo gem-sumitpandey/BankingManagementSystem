@@ -26,4 +26,6 @@ public class UserWriteDto {
     private String mobileNo;
     @Email
     private String email;
+
+
 }

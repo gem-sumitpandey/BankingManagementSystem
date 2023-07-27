@@ -2,10 +2,15 @@ package com.assignment.bankManagementSystem.services;
 
 import com.assignment.bankManagementSystem.dao.UserDao;
 import com.assignment.bankManagementSystem.dto.UserReadDto;
+import com.assignment.bankManagementSystem.dto.UserUpdateDto;
 import com.assignment.bankManagementSystem.dto.UserWriteDto;
 import com.assignment.bankManagementSystem.entities.Users;
+import com.assignment.bankManagementSystem.exceptions.ConstraintException;
 import com.assignment.bankManagementSystem.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -62,20 +67,14 @@ public class UserServicesImplementation implements UserServices{
     }
 
     @Override
-    public UserReadDto updateUserDetails(int userId, UserWriteDto userWriteDto){
+    public Users updateUserDetails(int userId, UserUpdateDto userUpdateDto){
 
         Users users=userDao.findById(userId).orElseThrow(()->new ResourceNotFoundException("This Id does not exist"));
-
-            users.setFirstName(userWriteDto.getFirstName());
-            users.setLastName(userWriteDto.getLastName());
-            users.setDateOfBirth(userWriteDto.getDateOfBirth());
-            users.setAddress(userWriteDto.getAddress());
-            users.setAadharNumber(userWriteDto.getAadharNumber());
-            users.setAge(userWriteDto.getAge());
-            users.setMobileNo(userWriteDto.getMobileNo());
-            users.setEmail(userWriteDto.getEmail());
+            users.setAddress(userUpdateDto.getAddress());
+            users.setMobileNo(userUpdateDto.getMobileNo());
+            users.setEmail(userUpdateDto.getEmail());
             users= userDao.save(users);
-            return convertToReadDto(users);
+            return users;
 
         }
 
@@ -83,9 +82,13 @@ public class UserServicesImplementation implements UserServices{
 
     @Override
     public void deleteUser(int userId) {
-        Users users=userDao.findById(userId).orElseThrow(()->new ResourceNotFoundException("This Id does not exist"));
-
+        try {
+            Users users = userDao.findById(userId).orElseThrow(() -> new ResourceNotFoundException("This Id does not exist"));
             userDao.deleteById(userId);
+        } catch (DataAccessException e) {
+            throw new ConstraintException("Can not delete because there exist one or more account at this userId");
+        }
+
         }
 
     }
